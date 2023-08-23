@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  labels:
+    app: p4ml-postgres
+data:
+  POSTGRES_DB: postgresdb
+  POSTGRES_USER: postgresadmin
+  POSTGRES_PASSWORD: paas4ml
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: postgres-pv-volume
+  labels:
+    type: local
+    app: p4ml-postgres
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/data"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: postgres-pv-claim
+  labels:
+    app: p4ml-postgres
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: p4ml-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: p4ml-postgres
+  template:
+    metadata:
+      labels:
+        app: p4ml-postgres
+    spec:
+      containers:
+        - name: p4ml-postgres
+          image: postgres:10.4
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: postgres-config
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: p4ml-postgres
+      volumes:
+        - name: p4ml-postgres
+          persistentVolumeClaim:
+            claimName: postgres-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: p4ml-postgres
+  labels:
+    app: p4ml-postgres
+spec:
+  ports:
+  - nodePort: 30003
+    port: 5432
+    protocol: TCP
+    targetPort: 5432
+  selector:
+    app: p4ml-postgres
+  type: LoadBalancer
+  loadBalancerIP: 192.168.1.153

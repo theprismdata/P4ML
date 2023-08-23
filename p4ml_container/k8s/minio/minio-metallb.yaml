@@ -1,0 +1,61 @@
+# 오류 발생시 kubectl describe pod minio****으로 확인
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: p4ml-minio
+spec:
+  # 복제 1개
+  replicas: 1
+  selector:
+    matchLabels:
+      app: p4ml-minio
+  template:
+    metadata:
+      labels:
+        app: p4ml-minio
+    spec:
+      volumes:
+      - name: storage
+        hostPath:
+          path: /data/minio
+      containers:
+      - name: p4ml-minio
+        imagePullPolicy: Always
+        image: 'bitnami/minio:latest'
+        env:
+        - name: MINIO_ROOT_USER
+          value: "minio"
+        - name: MINIO_ROOT_PASSWORD
+          value: "minio123"
+        - name: TZ
+          value: Asia/Seoul
+        - name: LANG
+          value: ko_KR.utf8
+        ports:
+        - containerPort: 9000
+          hostPort: 9000
+        - containerPort: 9001
+          hostPort: 9001
+        volumeMounts:
+        - name: storage
+          mountPath: "/storage"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: p4ml-minio
+  labels:
+    run: p4ml-minio
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 9000
+    targetPort: 9000
+    nodePort: 30333
+    name: api
+  - port: 9001
+    targetPort: 9001
+    nodePort: 30334
+    name: ui
+  selector:
+    app: p4ml-minio

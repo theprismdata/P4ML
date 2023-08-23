@@ -1,0 +1,85 @@
+version: "3"
+
+services:
+   jupyter:
+      image: 222.239.231.95:8093/pass4ml/p4ml_jupyter
+      ports:
+         - "8888:8888"
+      environment:
+         - JUPYTER_TOKEN=paas4ml
+      volumes:
+         - .\share_volume\jupyter_data:/example/workdir
+      networks:
+         - default
+         - datastore_net
+         
+   mongodb:
+      image: 222.239.231.95:8093/pass4ml/p4ml_mongodb
+      environment:
+         - MONGO_INITDB_ROOT_USERNAME=admin
+         - MONGO_INITDB_ROOT_PASSWORD=paas4ml
+         - MONGO_INITDB_DATABASE=paas4ml
+      ports:
+         - "27017:27017"
+      volumes:
+         - .\share_volume\mongodb_data:/data/db
+         
+      networks:
+         - default
+         - datastore_net
+         
+   grafana:
+       image: 222.239.231.95:8093/pass4ml/p4ml_grafana
+       restart: always
+       depends_on:
+          - influxdb
+       environment:
+          - GF_SECURITY_ADMIN_USER=admin
+          - GF_SECURITY_ADMIN_PASSWORD=paas4ml
+          - GF_INSTALL_PLUGINS=
+       links:
+          - influxdb
+       ports:
+          - '3000:3000'
+       volumes:
+          - .\share_volume\grafana_data:/var/lib/grafana
+       networks:
+         - default
+         - datastore_net
+         
+   influxdb:
+       image: 222.239.231.95:8093/pass4ml/p4ml_influxdb
+       restart: always
+       environment:
+          - DOCKER_INFLUXDB_INIT_MODE=setup
+          - DOCKER_INFLUXDB_INIT_USERNAME=admin
+          - DOCKER_INFLUXDB_INIT_PASSWORD=paas4ml
+          
+       ports:
+          - '8086:8086'
+       volumes:
+          - .\share_volume\influxdb_data:/var/lib/influxdb
+       networks:
+         - default
+         - datastore_net
+         
+
+   postgresql:
+       image: 222.239.231.95:8093/pass4ml/p4ml_postgres
+       restart: always
+       environment:
+          - POSTGRES_USER=admin
+          - POSTGRES_PASSWORD=paas4ml        
+       ports:
+          - "5432:5432"
+       volumes:
+          - .\share_volume\postgresql_data\data:/var/lib/postgresql/data
+          - .\share_volume\postgresql_data\log:/var/log/postgresql
+       networks:
+         - default
+         - datastore_net     
+        
+networks:
+    datastore_net:
+       driver: bridge
+        

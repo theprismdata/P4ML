@@ -1,0 +1,80 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: grafana-pv-volume
+  labels:
+    type: local
+    app: p4ml-grafana
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/grafana_data"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: grafana-pv-claim
+  labels:
+    app: p4ml-grafana
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: p4ml-grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: p4ml-grafana
+  template:
+    metadata:
+      name: p4ml-grafana
+      labels:
+        app: p4ml-grafana
+        
+    spec:
+      imagePullSecrets:
+      - name: prismimage
+      containers:
+      - name: p4ml-grafana
+        image: 222.239.231.95:8093/pass4ml/p4ml_grafana
+        ports:
+        - containerPort: 3000
+        env:
+          - name: GF_SECURITY_ADMIN_USER
+            value: admin        
+          - name: GF_SECURITY_ADMIN_PASSWORD
+            value: paas4ml
+        volumeMounts:
+            - mountPath: /mnt/grafana_lib/var/lib/grafana
+              name: grafana-pv
+      volumes:
+      - name: grafana-pv
+        persistentVolumeClaim:
+          claimName: grafana-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: p4ml-grafana
+spec:
+  ports:
+  - nodePort: 30000
+    port: 3000
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app: p4ml-grafana
+  type: LoadBalancer
+  loadBalancerIP: 192.168.1.150

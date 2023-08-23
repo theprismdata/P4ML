@@ -1,0 +1,83 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: jupyter-pv-volume
+  labels:
+    type: local
+    app: p4ml-jupyter
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/jupyter_data"
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: jupyter-pv-claim
+  labels:
+    app: p4ml-jupyter
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: p4ml-jupyter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: p4ml-jupyter
+  template:
+    metadata:
+      name: p4ml-jupyter
+      labels:
+        app: p4ml-jupyter
+        
+    spec:
+      imagePullSecrets:
+      - name: prismimage
+      containers:
+      - name: p4ml-jupyter
+        image: 222.239.231.95:8093/pass4ml/p4ml_jupyter
+        ports:
+        - containerPort: 8888
+        volumeMounts:
+          - mountPath: "/example/workdir/"
+            name: p4ml-jupyter-volume
+      volumes:
+        - name: p4ml-jupyter-volume
+          persistentVolumeClaim:
+            claimName: jupyter-pv-claim
+        #resources:
+        #  requests:
+        #    memory: "64Mi"
+        #    cpu: "250m"
+        #  limits:
+        #    memory: "128Mi"
+        #    cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: p4ml-jupyter
+spec:
+  ports:
+  - nodePort: 30001
+    port: 8888
+    protocol: TCP
+    targetPort: 8888
+  selector:
+    app: p4ml-jupyter
+  type: LoadBalancer
+  loadBalancerIP: 192.168.1.155

@@ -1,0 +1,130 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} POD LIST {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <!-- [ Main Content ] start -->
+    <section class="pcoded-main-container">
+        <div class="pcoded-wrapper">
+
+            <div class="pcoded-content">
+                <div class="pcoded-inner-content">
+                    <!-- [ breadcrumb ] start -->
+                    <div class="page-header">
+                        <div class="page-block">
+                            <div class="row align-items-center">
+                                <div class="col-md-12">
+                                    <div class="page-header-title">
+                                        <h5 class="m-b-10">POD LIST</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [ breadcrumb ] end -->
+
+                    <div class="main-body">
+                        <div class="page-wrapper">
+                            <!-- [ Main Content ] start -->
+                            <div class="row">
+                                <!-- [ basic-table ] start -->
+                                <div class="col-xl-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5>POD LIST</h5>
+                                            <span class="d-block m-t-5">use class <code>table</code> inside table element</span>
+                                        </div>
+                                        <div class="card-block table-border-style">
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>space</th>
+                                                            <th>pod name </th>
+                                                            <th colspan="2">Action</th>
+                                                        </tr>
+                                                    </thead>
+
+                                                    <tbody>
+                                                        {% for resource in resource_list %}
+                                                        <tr>
+                                                        <td>{{ resource.ns }}</td>
+                                                        <td>{{ resource.name }}</td>
+                                                        <td><button type="button" class="btn btn-primary" data-toggle="modal"
+                                                                data-target="#modal_diag{{resource['pod']}}">삭제</button>
+                                                        </td>
+                                                        <div class="modal fade" id="modal_diag{{resource['pod']}}" aria-labelledby="modal_diagLabel" aria-hidden="true" tabindex="-1" role="dialog">
+                                                          <div class="modal-dialog" role="document">
+                                                            <div class="modal-content">
+
+                                                              <div class="modal-header">
+                                                                <h5 class="modal-title" id="modal_diagLabel">서비스 제어</h5>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                  <span aria-hidden="true">(&times;)</span>
+                                                                </button>
+                                                              </div>
+                                                              <form id="contactForm" name="contact" role="form">
+                                                                    <div class="modal-body">
+                                                                      <div class="form-group">
+                                                                            <label for="space" id="svc_nmspace">{{ resource.ns }}</label>
+                                                                      </div>
+                                                                      <div class="form-group">
+                                                                            <label for="name" id="svc_name">{{ resource.name }}</label>
+                                                                      </div>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-danger" onclick="delete_click();"title="btn btn-danger" data-toggle="tooltip">Delete</button>
+                                                                    </div>
+                                                              </form>
+                                                            </div>
+                                                          </div>
+                                                        </div>
+                                                    </tr>
+                                                    {% endfor %}
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- [ Main Content ] end -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+    <!-- [ Main Content ] end -->
+<script>
+      function delete_click() {
+        var svc_nmspace = document.getElementById("svc_nmspace").textContent;
+        var svc_name = document.getElementById("svc_name").textContent;
+        console.log(svc_nmspace, "run");
+        console.log(svc_name, "run");
+        $.ajax({
+                url: "/pod_ctrl",
+                type:"POST",
+                data:{ "space": svc_nmspace, "name": svc_name, "mode":"apply"},
+                dataType: "JSON",
+                success: function (data){
+                    alert("데이터전송 성공");
+                },
+                error: function (error){
+                    alert("에러");
+                }
+                });
+
+      }
+
+  </script>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

@@ -1,0 +1,84 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: mongo-pv-volume
+  labels:
+    type: local
+    app: p4ml-mongodb
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/mongo_data"
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: mongo-pv-claim
+  labels:
+    app: p4ml-mongodb
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: p4ml-mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: p4ml-mongodb
+  template:
+    metadata:
+      name: p4ml-mongodb
+      labels:
+        app: p4ml-mongodb
+    spec:
+      imagePullSecrets:
+      - name: prismimage
+      containers:
+      - name: p4ml-mongodb
+        image: 222.239.231.95:8093/pass4ml/p4ml_mongodb
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: paas4ml
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          value: paas4ml
+        - name: MONGO_INITDB_DATABASE
+          value: ML_DB
+        volumeMounts:
+        - mountPath: /data/db
+          name: p4ml-mongodb
+        ports:
+        - containerPort: 27017
+      volumes:
+      - name: p4ml-mongodb
+        persistentVolumeClaim:
+          claimName: mongo-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: p4ml-mongodb
+spec:
+  ports:
+  - nodePort: 30002
+    port: 27017
+    protocol: TCP
+    targetPort: 27017
+  selector:
+    app: p4ml-mongodb
+  type: LoadBalancer
+  loadBalancerIP: 192.168.1.152

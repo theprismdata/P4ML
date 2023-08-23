@@ -1,0 +1,83 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: influxdb-pv-volume
+  labels:
+    type: local
+    app: p4ml-influxdb
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/influxdb_data"
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: influxdb-pv-claim
+  labels:
+    app: p4ml-influxdb
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: p4ml-influxdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: p4ml-influxdb
+  template:
+    metadata:
+      name: p4ml-influxdb
+      labels:
+        app: p4ml-influxdb
+    spec:
+      imagePullSecrets:
+      - name: prismimage
+      containers:
+      - name: p4ml-influxdb
+        image: 222.239.231.95:8093/pass4ml/p4ml_influxdb
+        ports:
+        - containerPort: 27017
+        env:
+        - name: INFLUXDB_CONFIG_PATH
+          value: /etc/influxdb/influxdb.conf  
+        - name: INFLUXDB_ADMIN_USER
+          value: admin
+        - name: INFLUXDB_ADMIN_PASSWORD
+          value: paas4ml
+        - name: INFLUXDB_DB
+          value: paas4ml
+        ports:
+        - containerPort: 27017
+      volumes:
+      - name: p4ml-influxdb
+        persistentVolumeClaim:
+          claimName: influxdb-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: p4ml-influxdb
+spec:
+  ports:
+  - nodePort: 30004
+    port: 8086
+    protocol: TCP
+    targetPort: 8086
+  selector:
+    app: p4ml-influxdb
+  type: LoadBalancer
+  loadBalancerIP: 192.168.1.154
