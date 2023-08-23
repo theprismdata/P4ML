@@ -5,6 +5,8 @@
 2. 접근 및 사용이 용이하도록 합니다.
 3. Kubernetes / AWS / NaverBusinessPlatform에서 동작하는 것을 목적으로 합니다.
 
+![](\feature\front1.png)
+
 ### 주요 구성 요소
 1. p4ml_container
    1. 데이터 저장소(Postgresql, Influxdb, MongoDB) 배포를 목적으로 합니다. 
