@@ -58,7 +58,7 @@ spec:
     spec:
       containers:
         - name: p4ml-postgres
-          image: postgres:10.4
+          image: prismdata/p4ml_postgresql
           imagePullPolicy: "IfNotPresent"
           ports:
             - containerPort: 5432

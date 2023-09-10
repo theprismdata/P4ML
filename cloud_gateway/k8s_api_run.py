@@ -42,7 +42,7 @@ def index():
     resp = jsonify(success=True)
     return resp
 
-@app.route('/get_list_pod_for_all_ns', methods=['GET'])
+@app.route('/k8s_private_get_list_pod_for_all_ns', methods=['GET'])
 def list_pod_for_all_namespaces():
     res_list = get_list_pod_for_all_namespaces(v1)
     resp = jsonify(success=True, response=res_list)
@@ -52,32 +52,38 @@ def list_pod_for_all_namespaces():
 def get_all_metric_all_namespaces():
     query = 'show measurements'
     result = influxdb_mgr.query(query)
-    node_metric = {}
+
+    node_metric = {'cluster_metric': {}, 'pod_metric': {}}
     for table in result.get_points():
         tname = table['name']
-        if 'k8s-cluster-resource' in tname:
+        if 'k8s_cluster_resource' in tname.replace('-', '_'):
             if tname not in table.keys():
-                node_metric[tname] = {'cpu': [], 'memory': [], 'last': {'cpu': 0, 'memory': 0, 'time': ''}}
-        elif 'k8s-pod-resource' in tname:
+                name_ = tname.replace('-', '_')
+                node_metric['cluster_metric'][name_] = {'cpu': [], 'memory': [],
+                                                        'last': {'cpu': 0, 'memory': 0, 'time': ''}}
+        elif 'k8s_pod_resource' in tname.replace('-', '_'):
             if tname not in table.keys():
-                node_metric[tname] = {'cpu': [], 'memory': [], 'last': {'cpu': 0, 'memory': 0, 'time': ''}}
+                name_ = tname.replace('-', '_')
+                node_metric['pod_metric'][name_] = {'cpu': [], 'memory': [],
+                                                    'last': {'cpu': 0, 'memory': 0, 'time': ''}}
 
-    for metric in node_metric.keys():
-        query = 'SELECT * FROM "{tnm}" WHERE time >= now() - 10s and time <= now();'.format(tnm=metric)
-        result = influxdb_mgr.query(query)
-
-        mtime = ''
-        for point in result.get_points():
-            mtime = point['time']
-            node_metric[metric]['cpu'].append(point['cpu'])
-            node_metric[metric]['memory'].append(point['memory'])
-        node_metric[metric]['last']['cpu'] = node_metric[metric]['cpu'][-1]
-        node_metric[metric]['last']['memory'] = node_metric[metric]['memory'][-1]
-        node_metric[metric]['last']['time'] = mtime
+    for section in node_metric.keys():
+        for metric in node_metric[section].keys():
+            print(section, metric)
+            query = 'SELECT * FROM "{tnm}" WHERE time >= now() - 10s and time <= now();'.format(
+                tnm=metric.replace('_', '-'))
+            result = influxdb_mgr.query(query)
+            for point in result.get_points():
+                mtime = point['time']
+                node_metric[section][metric]['cpu'].append(point['cpu'])
+                node_metric[section][metric]['memory'].append(point['memory'])
+            node_metric[section][metric]['last']['cpu'] = node_metric[section][metric]['cpu'][-1]
+            node_metric[section][metric]['last']['memory'] = node_metric[section][metric]['memory'][-1]
+            node_metric[section][metric]['last']['time'] = mtime
     return node_metric
 
 
-@app.route('/all_metric', methods=['GET'])
+@app.route('/k8s_private_all_metric', methods=['GET'])
 def get_metric_all_namespaces():
     res_list = get_all_metric_all_namespaces()
     resp = jsonify(success=True, response=res_list)

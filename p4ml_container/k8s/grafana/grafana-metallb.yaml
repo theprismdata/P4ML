@@ -48,7 +48,7 @@ spec:
       - name: prismimage
       containers:
       - name: p4ml-grafana
-        image: 222.239.231.95:8093/pass4ml/p4ml_grafana
+        image: prismdata/p4ml_grafana
         ports:
         - containerPort: 3000
         env:

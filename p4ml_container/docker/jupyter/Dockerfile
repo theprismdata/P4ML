@@ -1,20 +1,14 @@
 FROM python:3.8
 
 RUN ["mkdir","-p","/root/.jupyter"]
-RUN ["mkdir","-p","/example/workdir"]
+RUN ["mkdir","-p","/example/example_code"]
 RUN ["mkdir","-p","/example/sample_data"]
 
 ARG BUILD_PATH
 ADD $BUILD_PATH/requirements.txt /var/requirements.txt
+
 ADD $BUILD_PATH/sample_data /example/sample_data
-
-ADD $BUILD_PATH/mongo_ex.ipynb /example/mongo_ex.ipynb
-ADD $BUILD_PATH/PostgreSQL_ex.ipynb /example/PostgreSQL_ex.ipynb
-ADD $BUILD_PATH/LabelEncoder_1d_array.ipynb /example/LabelEncoder_1d_array.ipynb
-ADD $BUILD_PATH/object_storage.ipynb /example/object_storage.ipynb
-ADD $BUILD_PATH/pearson_correlation.ipynb /example/pearson_correlation.ipynb
-ADD $BUILD_PATH/scikit-decision-tree.ipynb /example/scikit-decision-tree.ipynb
-
+ADD $BUILD_PATH/example_code /example/example_code
 
 USER root
 RUN pip install jupyter notebook 

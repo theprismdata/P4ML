@@ -48,7 +48,7 @@ spec:
       - name: prismimage
       containers:
       - name: p4ml-influxdb
-        image: 222.239.231.95:8093/pass4ml/p4ml_influxdb
+        image: prismdata/p4ml_influxdb
         ports:
         - containerPort: 27017
         env:

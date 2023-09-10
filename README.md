@@ -14,8 +14,8 @@
    3. 웹기반 Python 개발환경(Jupyter notebook) 배표를 목적을 합니다.
       1. python container에는 다양한 예제가 포함됩니다.
       
-2. p4ml_mlservice
-   1. (p4ml_container로 통합)Machine Learning 모델 개발과 서비스를 위한 배포를 목표로 합니다.
+2. p4ml_container
+   1. Machine Learning 모델 개발과 서비스를 위한 패키지 배포를 목표로 합니다.
    
 3. mlops_component
    1. ML ops 배포를 목적으로 합니다.
@@ -105,7 +105,20 @@
             1. URL : localhost:5432
             2. Database : postgresdb
             3. ID : postgresadmin / Password : paas4ml
-
+            
+      2. 개별 docker로 실행
+         1. Influxdb: <br>
+            1. docker run -d -e DOCKER_INFLUXDB_INIT_MODE=setup -e DOCKER_INFLUXDB_INIT_USERNAME=admin -e DOCKER_INFLUXDB_INIT_PASSWORD=paas4ml -v .\share_volume\influxdb_data:/var/lib/influxdb --name p4ml_influxdb -p 8086:8086 prismdata/p4ml_influxdb
+         2. Grafana: <br>
+            1. docker run -d -e GF_SECURITY_ADMIN_USER=admin -e GF_SECURITY_ADMIN_PASSWORD=paas4ml -e GF_INSTALL_PLUGINS= -v .\share_volume\grafana_data:/var/lib/grafana --name p4ml_grafana -p 3000:3000 prismdata/p4ml_grafana
+         3. Mongodb: <br>
+            1. docker run -d -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD=paas4ml -e MONGO_INITDB_DATABASE=paas4ml -v .\share_volume\mongodb_data:/data/db --name p4ml_mongodb -p 27017:27017 prismdata/p4ml_mongodb
+         4. Jupyter: <br>
+            1. docker run -d --name p4ml_jupyter -p 8888:8888 -v .\share_volume\jupyter_data:/example/workdir prismdata/p4ml_jupyter  
+         5. PostgreSQL: <br>
+            1. run: docker run -d -e POSTGRES_USR=postgres -e POSTGRES_PASSWORD=paas4ml -v .\share_volume\postgresql_data\data:/var/lib/postgresql/data -v .\share_volume\postgresql_data\log:/var/log/postgresql --name p4ml_postgres  -p 5432:5432  prismdata/p4ml_postgresql
+         6. Host는 각 Container이름으로 접속
+         [k8s_api](infra_api_test%2Fk8s_api)
 6. Kubernetis NFS
    1. Pod의 데이터 보존과 접근을 위해 각 Worker 노드에 저장된 데이를 Master에서 접근할 수 있도록 Network Drive를 구성합니다. 
       1. Master Node
@@ -175,3 +188,7 @@
          192.168.1.100:/root/pod_storage/mongo_data /mnt/mongo_data 	nfs	defaults	0 0
          192.168.1.100:/root/pod_storage/jupyter_data /mnt/jupyter_data nfs	defaults	0 0
          ```
+         
+Used license <br>
+Mictronics GaugeMeter  MIT license <br>
+Flask-datta-able MIT License <br>

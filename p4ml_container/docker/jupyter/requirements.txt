@@ -4,6 +4,7 @@ matplotlib
 scipy
 scikit-learn
 tensorflow==2.12
+psycopg2==2.9.7
 keras
 statsmodels
 pymongo
@@ -11,5 +12,6 @@ matplotlib
 docutils
 seaborn==0.12.2
 #torch
+openpyxl==3.1.2
 apache-airflow
 minio

@@ -1,3 +1,4 @@
 FROM mongo:4.2
 
-ADD mongo-init.js /docker-entrypoint-initdb.d/mongo-init.js
+ARG BUILD_PATH
+ADD $BUILD_PATH/mongo-init.js /docker-entrypoint-initdb.d/mongo-init.js
