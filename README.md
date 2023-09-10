@@ -5,7 +5,7 @@
 2. 접근 및 사용이 용이하도록 합니다.
 3. Kubernetes / AWS / NaverBusinessPlatform에서 동작하는 것을 목적으로 합니다.
 
-![](\feature\front1.png)
+![front1](https://github.com/theprismdata/P4ML/assets/74163584/5503143e-2e4a-4e4e-b4d4-9dc7c1d0f661)
 
 ### 주요 구성 요소
 1. p4ml_container
