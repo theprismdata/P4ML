@@ -1,0 +1,9 @@
+docker build --tag cassandra -f Dockerfile .
+
+docker run -d  --name cassandra -p 9042:9042 -t cassandra
+
+docker exec -it cassandra sh
+
+shell: cassandra -R
+
+cqlsh -u cassandra -p cassandra

@@ -117,8 +117,16 @@
             1. docker run -d --name p4ml_jupyter -p 8888:8888 -v .\share_volume\jupyter_data:/example/workdir prismdata/p4ml_jupyter  
          5. PostgreSQL: <br>
             1. run: docker run -d -e POSTGRES_USR=postgres -e POSTGRES_PASSWORD=paas4ml -v .\share_volume\postgresql_data\data:/var/lib/postgresql/data -v .\share_volume\postgresql_data\log:/var/log/postgresql --name p4ml_postgres  -p 5432:5432  prismdata/p4ml_postgresql
-         6. Host는 각 Container이름으로 접속
-         [k8s_api](infra_api_test%2Fk8s_api)
+         6. Cassandra: <br>
+            1. docker run -d -p 9042:9042 --name p4ml_cassandra prismdata/p4ml_cassandra  sleep infinity
+            2. docker exec -it p4ml_cassandra sh
+               shell: cassandra -R
+            3. DBClient Tool:
+               1. Address: localhost Port: 9042
+               2. ID : cassandra Pwd : cassandra
+               
+      2.1. Host는 각 Container이름으로 접속
+      [k8s_api](infra_api_test%2Fk8s_api)
 6. Kubernetis NFS
    1. Pod의 데이터 보존과 접근을 위해 각 Worker 노드에 저장된 데이를 Master에서 접근할 수 있도록 Network Drive를 구성합니다. 
       1. Master Node
